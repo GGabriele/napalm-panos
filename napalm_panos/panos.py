@@ -372,9 +372,13 @@ class PANOSDriver(NetworkDriver):
 
         for element in interfaces:
             for entry in interfaces[element]:
-                for intf in interfaces[element][entry]:
-                    if intf['name'] not in facts['interface_list']:
-                        facts['interface_list'].append(intf['name'])
+                if isinstance(interfaces[element][entry], list):
+                    for intf in interfaces[element][entry]:
+                        if intf['name'] not in facts['interface_list']:
+                            facts['interface_list'].append(intf['name'])
+                else:
+                    if interfaces[element][entry]['name'] not in facts['interface_list']:
+                        facts['interface_list'].append(interfaces[element][entry]['name'])
         facts['interface_list'].sort()
         return facts
 
@@ -431,7 +435,7 @@ class PANOSDriver(NetworkDriver):
             routes_table_xml = xmltodict.parse(self.device.xml_root())
             routes_table_json = json.dumps(routes_table_xml['response']['result']['entry'])
             routes_table = json.loads(routes_table_json)
-        except (AttributeError, KeyError):
+        except AttributeError:
             routes_table = []
 
         if isinstance(routes_table, dict):
